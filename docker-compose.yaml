@@ -51,15 +51,14 @@ services:
       - services_net
 
   splunk-uf:
-    image: splunk/universalforwarder:latest
+    image: splunk/universalforwarder:9.3.2
     container_name: splunk-uf
     environment:
       - SPLUNK_START_ARGS=--accept-license
       - SPLUNK_PASSWORD=changeme123
     volumes:
       - /var/lib/docker/containers:/docker/containers:ro
-      - /opt/services/inputs.conf:/opt/splunkforwarder/etc/system/local/inputs.conf:ro
-      - /opt/services/outputs.conf:/opt/splunkforwarder/etc/system/local/outputs.conf:ro
+      - /opt/services/splunk-conf:/opt/splunkforwarder/etc/system/local
     networks:
       - services_net
     depends_on:
