@@ -10,8 +10,6 @@ services:
     volumes:
       - /opt/services/conf/nginx.conf:/etc/nginx/nginx.conf
       - /opt/services/certs:/etc/nginx/certs
-      - /opt/services/vhost.d:/etc/nginx/vhost.d
-      - /opt/services/html:/usr/share/nginx/html
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - /opt/services/logs:/opt/bitnami/nginx/logs
     user: root:root
@@ -34,6 +32,38 @@ services:
     command: "--memcached=memcached:11211 --port 8082"
     networks:
       - services_net
+  
+  splunk:
+    image: splunk/splunk:latest
+    container_name: splunk
+    environment:
+      - SPLUNK_START_ARGS=--accept-license
+      - SPLUNK_PASSWORD=changeme123
+      - SPLUNK_HEC_ENABLE=true
+      - SPLUNK_HEC_TOKEN=abc123token
+    #ports:
+    #  - "8000:8000"   #Splunk UI
+    #  - "8088:8088"   #Splunk HTTP Event Collector (HEC)
+    #  - "9997:9997"   #Splunk Universal Forwarder
+    volumes:
+      - /opt/services/splunk-data:/opt/splunk/var
+    networks:
+      - services_net
+
+  splunk-uf:
+    image: splunk/universalforwarder:latest
+    container_name: splunk-uf
+    environment:
+      - SPLUNK_START_ARGS=--accept-license
+      - SPLUNK_PASSWORD=changeme123
+    volumes:
+      - /var/lib/docker/containers:/docker/containers:ro
+      - /opt/services/inputs.conf:/opt/splunkforwarder/etc/system/local/inputs.conf:ro
+      - /opt/services/outputs.conf:/opt/splunkforwarder/etc/system/local/outputs.conf:ro
+    networks:
+      - services_net
+    depends_on:
+      - splunk
 
 networks:
   services_net:
