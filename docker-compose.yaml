@@ -50,21 +50,37 @@ services:
       - /opt/services/splunk-data:/opt/splunk/var
     networks:
       - services_net
-
-  splunk-uf:
-    image: splunk/universalforwarder:9.3.2
-    container_name: splunk-uf
-    restart: always
-    environment:
-      - SPLUNK_START_ARGS=--accept-license
-      - SPLUNK_PASSWORD=changeme123
+  
+  socat:
+    image: alpine/socat
+    container_name: log-forwarder
+    depends_on:
+      - nginx-proxy
+      - splunk
+      - memcached
+      - yopass
     volumes:
-      - /var/lib/docker/containers:/docker/containers:ro
-      - /opt/services/splunk-conf:/opt/splunkforwarder/etc/system/local
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: >
+      sh -c "tail -F /var/lib/docker/containers/*/*.log |
+             socat - TCP:splunk:9997"
     networks:
       - services_net
-    depends_on:
-      - splunk
+
+  # splunk-uf:
+  #   image: splunk/universalforwarder:9.3.2
+  #   container_name: splunk-uf
+  #   restart: always
+  #   environment:
+  #     - SPLUNK_START_ARGS=--accept-license
+  #     - SPLUNK_PASSWORD=changeme123
+  #   volumes:
+  #     - /var/lib/docker/containers:/docker/containers:ro
+  #     - /opt/services/splunk-conf:/opt/splunkforwarder/etc/system/local
+  #   networks:
+  #     - services_net
+  #   depends_on:
+  #     - splunk
 
 networks:
   services_net:
