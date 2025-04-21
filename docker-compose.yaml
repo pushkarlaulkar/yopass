@@ -36,6 +36,7 @@ services:
   splunk:
     image: splunk/splunk:latest
     container_name: splunk
+    restart: always
     environment:
       - SPLUNK_START_ARGS=--accept-license
       - SPLUNK_PASSWORD=changeme123
@@ -53,6 +54,7 @@ services:
   splunk-uf:
     image: splunk/universalforwarder:9.3.2
     container_name: splunk-uf
+    restart: always
     environment:
       - SPLUNK_START_ARGS=--accept-license
       - SPLUNK_PASSWORD=changeme123
